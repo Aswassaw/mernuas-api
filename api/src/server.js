@@ -20,6 +20,9 @@ app.get("/", (req, res) => {
   res.send("MERN Ultimate Auth");
 });
 
+// Endpoint (v1)
+app.use("/api/v1/auth", require("./v1/routes/auth"));
+
 // Running Server
 const PORT = process.env.API_PORT || 4000;
 app.listen(PORT, () => {
