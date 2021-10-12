@@ -5,8 +5,12 @@ const morgan = require("morgan");
 const compression = require("compression");
 const helmet = require("helmet");
 const chalk = require("chalk");
+const connectToDB = require("./v1/config/db");
 
 const app = express();
+
+// Menghubungkan ke MongoDB
+connectToDB();
 
 // Middlewares
 app.use(express.json());
