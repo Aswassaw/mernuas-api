@@ -1,4 +1,5 @@
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
@@ -8,14 +9,14 @@ const sendEmail = require("../utils/email/sendEmail");
 
 // @POST     | /api/auth/register
 const register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+  const { name, email, password } = req.body;
 
+  try {
     // check if email already exist
     const user = await User.findOne({ email });
     if (user) {
       return res
-        .status(400)
+        .status(409)
         .json({ errors: [{ msg: "Email already exist", param: "email" }] });
     }
 
@@ -53,7 +54,67 @@ const register = async (req, res) => {
     };
     sendEmail(templateEmail);
 
-    res.json({ msg: "Register success! Please login." });
+    // send jsonwebtoken
+    jwt.sign(
+      {
+        user: {
+          id: newUser.id,
+        },
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: 18000, // will expired after 5 hours
+      },
+      (err, token) => {
+        if (err) throw err;
+
+        res.json({ token });
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Server Error");
+  }
+};
+
+// @POST     | /api/auth/login
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    // check if email exist or not
+    if (!user) {
+      return res.status(401).json({
+        errors: [{ msg: "Email or Password is wrong" }],
+      });
+    }
+
+    // check if password correct or not
+    const passwordIsMatch = await bcrypt.compare(password, user.password);
+    if (!passwordIsMatch)
+      return res.status(401).json({
+        errors: [{ msg: "Email or Password is wrong" }],
+      });
+
+    // send jsonwebtoken
+    jwt.sign(
+      {
+        user: {
+          id: user.id,
+        },
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: 18000, // will expired after 5 hours
+      },
+      (err, token) => {
+        if (err) throw err;
+
+        res.json({ token });
+      }
+    );
   } catch (error) {
     console.log(error);
     return res.status(500).send("Server Error");
@@ -65,7 +126,7 @@ const accountActivation = async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
-    return res.status(400).json({
+    return res.status(401).json({
       errors: [{ msg: "No token, Activation denied", param: "token" }],
     });
   }
@@ -75,7 +136,7 @@ const accountActivation = async (req, res) => {
 
     // check if token exist or not
     if (!activationToken) {
-      return res.status(400).json({
+      return res.status(401).json({
         errors: [
           { msg: "Token is not valid, Activation failed", param: "token" },
         ],
@@ -85,7 +146,7 @@ const accountActivation = async (req, res) => {
     // check if token expired or not
     if (Date.now() - Date.parse(activationToken.createdAt) > 18000000) {
       // 30 minutes
-      return res.status(400).json({
+      return res.status(410).json({
         errors: [
           {
             msg: "Token has expired, Activation failed. Try requesting a new token",
@@ -110,4 +171,4 @@ const accountActivation = async (req, res) => {
   }
 };
 
-module.exports = { register, accountActivation };
+module.exports = { register, login, accountActivation };

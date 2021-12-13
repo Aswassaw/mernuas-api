@@ -19,4 +19,10 @@ const registerValidation = [
   ).matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/, "i"),
 ];
 
-module.exports = { registerValidation };
+// @POST     | /api/auth/login
+const loginValidation = [
+  check("email", "Please include a valid email").isEmail(),
+  check("password", "Password is required").not().isEmpty(),
+];
+
+module.exports = { registerValidation, loginValidation };
