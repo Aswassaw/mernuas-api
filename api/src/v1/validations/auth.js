@@ -10,6 +10,13 @@ const registerValidation = [
   check("password", "Password require 8 or more characters").isLength({
     min: 8,
   }),
+  check("password", "Password can't above 100 characters").isLength({
+    max: 100,
+  }),
+  check(
+    "password",
+    "Password must include one lowercase character, one uppercase character, a number, and a special character"
+  ).matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/, "i"),
 ];
 
 module.exports = { registerValidation };

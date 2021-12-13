@@ -32,10 +32,6 @@ const UserScheme = new mongoose.Schema(
       type: String,
       default: "user", // user -> admin -> superadmin
     },
-    resetPasswordLink: {
-      data: String,
-      default: "",
-    },
   },
   { timestamps: true }
 );
