@@ -1,15 +1,20 @@
 const mongoose = require("mongoose");
 
+// user schema
 const UserScheme = new mongoose.Schema(
   {
     name: {
       type: String,
+      trim: true,
       required: true,
+      max: 50,
     },
     email: {
       type: String,
+      trim: true,
       required: true,
       unique: true,
+      lowercase: true,
     },
     password: {
       type: String,
@@ -17,15 +22,19 @@ const UserScheme = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "default.jpg",
+      default: "https://images227.netlify.app/mernuas/default.jpg",
     },
     verified: {
       type: Boolean,
       default: false,
     },
     role: {
-      type: Number,
-      default: 3,
+      type: String,
+      default: "user", // user -> admin -> superadmin
+    },
+    resetPasswordLink: {
+      data: String,
+      default: "",
     },
   },
   { timestamps: true }
