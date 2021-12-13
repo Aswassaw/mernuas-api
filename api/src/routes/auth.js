@@ -1,6 +1,6 @@
 const express = require('express');
 const { register } = require('../controllers/auth');
-const { runValidation } = require('../utils/runValidation');
+const runValidation = require('../utils/runValidation');
 const { registerValidation } = require('../validations/auth');
 
 const router = express.Router();

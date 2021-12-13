@@ -35,8 +35,8 @@ app.get("/", (req, res) => {
     res.set("Content-Type", "text/html");
     // Jika file tidak ditemukan
     if (err) {
-      res.write("<title>Mernuas</title>");
-      res.write("<h1>Mernuas - MERN Ultimate Auth System</h1>");
+      res.write(`<title>${process.env.APP_NAME}</title>`);
+      res.write(`<h1>${process.env.APP_NAME} - MERN Ultimate Auth System</h1>`);
       res.write(`<p>Read API Documentation: <a href="#">Doc</a></p>`);
       res.end();
     } else {

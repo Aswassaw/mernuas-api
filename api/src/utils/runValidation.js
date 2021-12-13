@@ -10,4 +10,4 @@ const runValidation = (req, res, next) => {
   next();
 };
 
-module.exports = { runValidation };
+module.exports = runValidation;
