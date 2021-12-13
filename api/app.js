@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const compression = require("compression");
 const helmet = require("helmet");
 const chalk = require("chalk");
-const connectToDB = require("./v1/config/db");
+const connectToDB = require("./src/config/db");
 
 const app = express();
 
@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === "production") {
 
 // Root Endpoint
 app.get("/", (req, res) => {
-  fs.readFile(__dirname + "/v1/html/index.html", (err, data) => {
+  fs.readFile(__dirname + "/src/html/index.html", (err, data) => {
     res.set("Content-Type", "text/html");
     // Jika file tidak ditemukan
     if (err) {
@@ -47,7 +47,7 @@ app.get("/", (req, res) => {
 });
 
 // Endpoint (v1)
-app.use("/api/v1/auth", require("./v1/routes/auth"));
+app.use("/api/v1/auth", require("./src/routes/auth"));
 
 // 404 Endpoint
 app.use("/", (req, res) => {
