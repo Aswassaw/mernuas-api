@@ -1,6 +1,6 @@
 const { check } = require("express-validator");
 
-// @POST     | /api/v1/auth/register
+// @POST     | /api/auth/register
 const registerValidation = [
   check("name", "Name is required").not().isEmpty(),
   check("name", "Name maximum length is 50 characters").isLength({

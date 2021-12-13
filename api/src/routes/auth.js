@@ -1,11 +1,13 @@
 const express = require('express');
-const { register } = require('../controllers/auth');
+const { register, accountActivation } = require('../controllers/auth');
 const runValidation = require('../utils/runValidation');
 const { registerValidation } = require('../validations/auth');
 
 const router = express.Router();
 
-// @POST     | /api/v1/auth/register
+// @POST     | /api/auth/register
 router.post("/register", registerValidation, runValidation, register);
+// @POST     | /api/auth/account-activation
+router.post("/account-activation", accountActivation);
 
 module.exports = router;

@@ -6,7 +6,7 @@ const Token = require("../models/Token");
 const activateAccount = require("../utils/email/activateAccount");
 const sendEmail = require("../utils/email/sendEmail");
 
-// @POST     | /api/v1/auth/register
+// @POST     | /api/auth/register
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -60,4 +60,54 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+// @POST     | /api/auth/register
+const accountActivation = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({
+      errors: [{ msg: "No token, Activation denied", param: "token" }],
+    });
+  }
+
+  try {
+    const activationToken = await Token.findOne({ token });
+
+    // check if token exist or not
+    if (!activationToken) {
+      return res.status(400).json({
+        errors: [
+          { msg: "Token is not valid, Activation failed", param: "token" },
+        ],
+      });
+    }
+
+    // check if token expired or not
+    if (Date.now() - Date.parse(activationToken.createdAt) > 18000000) {
+      // 30 minutes
+      return res.status(400).json({
+        errors: [
+          {
+            msg: "Token has expired, Activation failed. Try requesting a new token",
+            param: "token",
+          },
+        ],
+      });
+    }
+
+    // change verified status
+    const user = await User.findOne({ email: activationToken.email });
+    user.verified = true;
+    user.save();
+
+    // delete activation token
+    await activationToken.remove();
+
+    res.json({ msg: "Congratulations! Your account has been verified." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Server Error");
+  }
+};
+
+module.exports = { register, accountActivation };
