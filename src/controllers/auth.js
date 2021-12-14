@@ -218,6 +218,10 @@ const resendAccountActivationLink = async (req, res) => {
   }
 };
 
+// @POST     | Public     | /api/auth/forgot-password
+// @POST     | Public     | /api/auth/forgot-password/resend
+// @POST     | Public     | /api/auth/reset-password
+
 module.exports = {
   register,
   login,
