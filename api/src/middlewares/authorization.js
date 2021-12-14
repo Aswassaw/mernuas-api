@@ -16,12 +16,13 @@ const authorization = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // mengisi request dengan hasil decode jwt token 
+    // mengisi request dengan hasil decode jwt token
     req.user = decoded.user;
 
     next();
-  } catch (err) {
-    res
+  } catch (error) {
+    console.log(error);
+    return res
       .status(401)
       .json({ errors: [{ msg: "Token is not valid, Authorization failed" }] });
   }
