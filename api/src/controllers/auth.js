@@ -181,10 +181,38 @@ const resendAccountActivationLink = async (req, res) => {
         .json({ errors: [{ msg: "User is not valid, resend token failed" }] });
     }
 
-    res.json({
-      msg: "User valid"
-    })
-  } catch (err) {
+    // if user already verified
+    if (user.verified) {
+      return res
+        .status(401)
+        .json({ errors: [{ msg: "User already verified" }] });
+    }
+
+    const token = await Token.findOne({ email: user.email });
+    // delete old activation account token
+    if (token) await token.remove();
+
+    // save new activation account token to db
+    const newToken = new Token({
+      token: crypto.randomBytes(30).toString("hex"),
+      email: user.email,
+      type: "Activate Account",
+    });
+    await newToken.save();
+
+    // send email for activate account account
+    const templateEmail = {
+      from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
+      to: user.email,
+      subject: "Activate Your Account!",
+      html: activateAccount(
+        `${process.env.CLIENT_URL}/auth/activate/${newToken.token}`
+      ),
+    };
+    sendEmail(templateEmail);
+
+    res.json({ msg: "New token successfully resend, check your email" });
+  } catch (error) {
     console.log(error);
     return res.status(500).send("Server Error");
   }

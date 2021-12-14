@@ -20,7 +20,7 @@ const resetPassword = (link) => {
   
   <hr>
   
-  <p>Copyright &copy; ${new Date().getFullYear()} Mernuas - Developed with <span style="color: red !important;">🖤</span> by <a style="text-decoration: none;" href="https://github.com/andry-pebrianto" target="_blank">Andry Pebrianto</a> in Trenggalek</p>`;
+  <p>Copyright &copy; ${new Date().getFullYear()} Mernuas - Developed with <span style="color: red !important;">❤️</span> by <a style="text-decoration: none;" href="https://github.com/andry-pebrianto" target="_blank">Andry Pebrianto</a> in Trenggalek</p>`;
 
   return htmlTemplateTop + htmlContent + htmlTemplateBottom;
 };
