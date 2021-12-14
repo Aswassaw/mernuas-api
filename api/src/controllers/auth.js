@@ -7,7 +7,7 @@ const Token = require("../models/Token");
 const activateAccount = require("../utils/email/activateAccount");
 const sendEmail = require("../utils/email/sendEmail");
 
-// @POST     | /api/auth/register
+// @POST     | Public     | /api/auth/register
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -77,7 +77,7 @@ const register = async (req, res) => {
   }
 };
 
-// @POST     | /api/auth/login
+// @POST     | Public     | /api/auth/login
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -121,7 +121,7 @@ const login = async (req, res) => {
   }
 };
 
-// @POST     | /api/auth/register
+// @POST     | Private    | /api/auth/account-activation
 const accountActivation = async (req, res) => {
   const { token } = req.body;
 
@@ -171,4 +171,28 @@ const accountActivation = async (req, res) => {
   }
 };
 
-module.exports = { register, login, accountActivation };
+// @POST     | Private    | /api/auth/account-activation/resend
+const resendAccountActivationLink = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res
+        .status(401)
+        .json({ errors: [{ msg: "User is not valid, resend token failed" }] });
+    }
+
+    res.json({
+      msg: "User valid"
+    })
+  } catch (err) {
+    console.log(error);
+    return res.status(500).send("Server Error");
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  accountActivation,
+  resendAccountActivationLink,
+};

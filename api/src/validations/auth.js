@@ -1,6 +1,6 @@
 const { check } = require("express-validator");
 
-// @POST     | /api/auth/register
+// @POST     | Public     | /api/auth/register
 const registerValidation = [
   check("name", "Name is required").not().isEmpty(),
   check("name", "Name maximum length is 50 characters").isLength({
@@ -19,7 +19,7 @@ const registerValidation = [
   ).matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/, "i"),
 ];
 
-// @POST     | /api/auth/login
+// @POST     | Public     | /api/auth/login
 const loginValidation = [
   check("email", "Please include a valid email").isEmail(),
   check("password", "Password is required").not().isEmpty(),
