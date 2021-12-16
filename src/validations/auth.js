@@ -6,6 +6,9 @@ const registerValidation = [
   check("name", "Name maximum length is 50 characters").isLength({
     max: 50,
   }),
+  check("name", "Name only can contains alphabet").isAlpha("en-US", {
+    ignore: " ",
+  }),
   check("email", "Please include a valid email").isEmail(),
   check("password", "Password require 8 or more characters").isLength({
     min: 8,

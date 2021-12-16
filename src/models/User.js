@@ -9,6 +9,11 @@ const UserScheme = new mongoose.Schema(
       required: true,
       max: 50,
     },
+    slug: {
+      type: String,
+      trim: true,
+      required: true,
+    },
     email: {
       type: String,
       trim: true,

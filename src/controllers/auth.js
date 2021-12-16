@@ -23,6 +23,9 @@ const register = async (req, res) => {
     // create new user instance
     const newUser = new User({
       name,
+      slug:
+        name.trim().toLowerCase().split(" ").join("-") +
+        crypto.randomBytes(6).toString("hex"),
       email,
       password,
     });
