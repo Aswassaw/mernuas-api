@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // token schema
-const TokenScheme = new mongoose.Schema(
+const TokenSchema = new mongoose.Schema(
   {
     token: {
       type: String,
@@ -20,6 +20,14 @@ const TokenScheme = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Token = mongoose.model("token", TokenScheme);
+TokenSchema.set("toJSON", {
+  transform: function (doc, obj, options) {
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+  },
+});
+
+const Token = mongoose.model("token", TokenSchema);
 
 module.exports = Token;

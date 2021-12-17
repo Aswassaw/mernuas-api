@@ -17,7 +17,7 @@ router.post("/register", registerValidation, runValidation, register);
 router.post("/login", loginValidation, runValidation, login);
 // @POST     | Public     | /api/auth/account-activation
 router.post("/account-activation", accountActivation);
-// @POST     | Private    | /api/auth/account-activation
+// @POST     | Private    | /api/auth/account-activation/resend
 router.post("/account-activation/resend", authorization, resendAccountActivationLink);
 
 module.exports = router;

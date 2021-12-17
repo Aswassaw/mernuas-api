@@ -48,6 +48,7 @@ app.get("/", (req, res) => {
 
 // Primary Endpoint
 app.use("/api/auth", require("./src/routes/auth"));
+app.use("/api/user", require("./src/routes/user"));
 
 // 404 Endpoint
 app.use("/", (req, res) => {

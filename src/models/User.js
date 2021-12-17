@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // user schema
-const UserScheme = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -24,6 +24,7 @@ const UserScheme = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     avatar: {
       type: String,
@@ -41,6 +42,14 @@ const UserScheme = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model("user", UserScheme);
+UserSchema.set("toJSON", {
+  transform: function (doc, obj, options) {
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+  },
+});
+
+const User = mongoose.model("user", UserSchema);
 
 module.exports = User;

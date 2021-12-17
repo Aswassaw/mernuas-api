@@ -24,7 +24,7 @@ const register = async (req, res) => {
     const newUser = new User({
       name,
       slug:
-        name.trim().toLowerCase().split(" ").join("-") +
+        name.trim().toLowerCase().split(" ").join("-") + "-" +
         crypto.randomBytes(6).toString("hex"),
       email,
       password,
