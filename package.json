@@ -26,9 +26,12 @@
     "express-validator": "^6.13.0",
     "google-auth-library": "^7.10.0",
     "helmet": "^4.6.0",
+    "i": "^0.3.7",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.10",
     "morgan": "^1.10.0",
-    "nodemailer": "^6.7.2"
+    "nodemailer": "^6.7.2",
+    "nodemailer-smtp-pool": "^2.8.3",
+    "npm": "^8.3.0"
   }
 }

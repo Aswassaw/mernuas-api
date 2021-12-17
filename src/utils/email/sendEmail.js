@@ -1,7 +1,7 @@
-const emailConfig = require("../../config/email");
+const transporter = require("../../config/email");
 
 const sendEmail = (dataEmail) => {
-  return emailConfig
+  return transporter
     .sendMail(dataEmail)
     .then((info) => {
       console.log("Email sended successfully.");

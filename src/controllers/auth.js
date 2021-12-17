@@ -24,7 +24,8 @@ const register = async (req, res) => {
     const newUser = new User({
       name,
       slug:
-        name.trim().toLowerCase().split(" ").join("-") + "-" +
+        name.trim().toLowerCase().split(" ").join("-") +
+        "-" +
         crypto.randomBytes(6).toString("hex"),
       email,
       password,
@@ -43,8 +44,8 @@ const register = async (req, res) => {
     });
 
     // save new user and token to db
-    await newUser.save();
-    await newToken.save();
+    // await newUser.save();
+    // await newToken.save();
 
     // send email for activate account account
     const templateEmail = {
@@ -85,7 +86,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
 
     // check if email exist or not
     if (!user) {
