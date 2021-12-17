@@ -44,8 +44,8 @@ const register = async (req, res) => {
     });
 
     // save new user and token to db
-    // await newUser.save();
-    // await newToken.save();
+    await newUser.save();
+    await newToken.save();
 
     // send email for activate account account
     const templateEmail = {

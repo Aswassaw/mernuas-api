@@ -63,7 +63,4 @@ app.listen(PORT, () => {
   );
   console.log(chalk`Visit {rgb(128, 237, 153) http://localhost:${PORT}}`);
   console.log(chalk`Developed by {rgb(255, 92, 88) Andry Pebrianto}`);
-  console.log(process.env.EMAIL_FROM);
-  console.log(process.env.EMAIL_USER);
-  console.log(process.env.EMAIL_PASS);
 });
