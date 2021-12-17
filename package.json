@@ -28,10 +28,7 @@
     "helmet": "^4.6.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.10",
-    "nodemailer": "^6.7.2"
-  },
-  "devDependencies": {
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.13"
+    "nodemailer": "^6.7.2"
   }
 }
