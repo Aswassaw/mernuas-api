@@ -77,7 +77,7 @@ const register = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server Error");
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
   }
 };
 
@@ -121,7 +121,7 @@ const login = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server Error");
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
   }
 };
 
@@ -131,7 +131,7 @@ const accountActivation = async (req, res) => {
 
   if (!token) {
     return res.status(401).json({
-      errors: [{ msg: "No token, Activation denied", param: "token" }],
+      errors: [{ msg: "No token, Activation denied" }],
     });
   }
 
@@ -141,9 +141,7 @@ const accountActivation = async (req, res) => {
     // check if token exist or not
     if (!activationToken) {
       return res.status(401).json({
-        errors: [
-          { msg: "Token is not valid, Activation failed", param: "token" },
-        ],
+        errors: [{ msg: "Token is not valid, Activation failed" }],
       });
     }
 
@@ -154,7 +152,6 @@ const accountActivation = async (req, res) => {
         errors: [
           {
             msg: "Token has expired, Activation failed. Try requesting a new token",
-            param: "token",
           },
         ],
       });
@@ -171,7 +168,7 @@ const accountActivation = async (req, res) => {
     res.json({ msg: "Congratulations! Your account has been verified." });
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server Error");
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
   }
 };
 
@@ -218,7 +215,7 @@ const resendAccountActivationLink = async (req, res) => {
     res.json({ msg: "New token successfully resend, check your email" });
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Server Error");
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
   }
 };
 
