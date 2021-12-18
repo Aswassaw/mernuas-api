@@ -1,7 +1,6 @@
 require("dotenv").config();
 const { google } = require("googleapis");
 const nodemailer = require("nodemailer");
-const smtpPool = require("nodemailer-smtp-pool");
 
 // oayh2 config
 const oAuth2Client = new google.auth.OAuth2(
