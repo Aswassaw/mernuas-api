@@ -165,7 +165,7 @@ const accountActivation = async (req, res) => {
     // delete activation token
     await activationToken.remove();
 
-    res.json({ msg: "Congratulations! Your account has been verified." });
+    res.json({ msg: "Congratulations! Your account has been verified" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ errors: [{ msg: "Server Error" }] });
@@ -212,7 +212,7 @@ const resendAccountActivationLink = async (req, res) => {
     };
     sendEmail(templateEmail);
 
-    res.json({ msg: "New token successfully resend, check your email" });
+    res.json({ msg: "Verification email successfully resend" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ errors: [{ msg: "Server Error" }] });
