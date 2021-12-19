@@ -53,7 +53,7 @@ const register = async (req, res) => {
       to: newUser.email,
       subject: "Activate Your Account!",
       html: activateAccount(
-        `${process.env.CLIENT_URL}/auth/activate/${newToken.token}`
+        `${process.env.CLIENT_URL}/activate/${newToken.token}`
       ),
     };
     sendEmail(templateEmail);
@@ -213,7 +213,7 @@ const resendAccountActivationLink = async (req, res) => {
       to: user.email,
       subject: "Activate Your Account!",
       html: activateAccount(
-        `${process.env.CLIENT_URL}/auth/activate/${newToken.token}`
+        `${process.env.CLIENT_URL}/activate/${newToken.token}`
       ),
     };
     sendEmail(templateEmail);
