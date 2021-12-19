@@ -141,7 +141,12 @@ const accountActivation = async (req, res) => {
     // check if token exist or not
     if (!activationToken) {
       return res.status(401).json({
-        errors: [{ msg: "Token is not valid, Activation failed" }],
+        errors: [
+          {
+            msg:
+              "Token is not valid, Activation failed. Try requesting a new token",
+          },
+        ],
       });
     }
 
@@ -151,7 +156,8 @@ const accountActivation = async (req, res) => {
       return res.status(410).json({
         errors: [
           {
-            msg: "Token has expired, Activation failed. Try requesting a new token",
+            msg:
+              "Token has expired, Activation failed. Try requesting a new token",
           },
         ],
       });

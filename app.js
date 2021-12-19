@@ -23,7 +23,7 @@ app.use(
 );
 if (process.env.NODE_ENV === "production") {
   app.use(morgan("combined"));
-  // app.use(cors({ origin: "https://mernuas.netlify.app" }));
+  app.use(cors({ origin: "https://mernuas.netlify.app" }));
   app.use(cors({ origin: "http://localhost:3000" }));
 } else {
   app.use(morgan("dev"));
