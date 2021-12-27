@@ -4,7 +4,8 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Token = require("../models/Token");
-const activateAccount = require("../utils/email/activateAccount");
+const activateAccountEmail = require("../utils/email/activateAccountEmail");
+const resetPasswordEmail = require("../utils/email/resetPasswordEmail");
 const sendEmail = require("../utils/email/sendEmail");
 
 // @POST     | Public     | /api/auth/register
@@ -52,7 +53,7 @@ const register = async (req, res) => {
       from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
       to: newUser.email,
       subject: "Activate Your Account!",
-      html: activateAccount(
+      html: activateAccountEmail(
         `${process.env.CLIENT_URL}/activate/${newToken.token}`
       ),
     };
@@ -72,7 +73,7 @@ const register = async (req, res) => {
       (err, token) => {
         if (err) throw err;
 
-        res.json({ token });
+        res.status(201).json({ token });
       }
     );
   } catch (error) {
@@ -212,7 +213,7 @@ const resendAccountActivationLink = async (req, res) => {
       from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
       to: user.email,
       subject: "Activate Your Account!",
-      html: activateAccount(
+      html: activateAccountEmail(
         `${process.env.CLIENT_URL}/activate/${newToken.token}`
       ),
     };
@@ -226,12 +227,109 @@ const resendAccountActivationLink = async (req, res) => {
 };
 
 // @POST     | Public     | /api/auth/forgot-password
-// @POST     | Public     | /api/auth/forgot-password/resend
-// @POST     | Public     | /api/auth/reset-password
+const forgotPassword = async (req, res) => {
+  const email = req.body.email.toLowerCase();
+
+  try {
+    const user = await User.findOne({ email });
+
+    // check if email exist or not
+    if (!user) {
+      return res.json({
+        msg: "Reset email successfully sended, please check your email",
+      });
+    }
+
+    // // create new token instance
+    const token = crypto.randomBytes(30).toString("hex");
+    const newToken = new Token({
+      token,
+      email,
+      type: "Reset Password",
+    });
+
+    // save new token to db
+    await newToken.save();
+
+    // send email for reset password
+    const templateEmail = {
+      from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
+      to: email,
+      subject: "Reset Your Password!",
+      html: resetPasswordEmail(
+        `${process.env.CLIENT_URL}/reset/${newToken.token}`
+      ),
+    };
+    sendEmail(templateEmail);
+
+    res.json({
+      msg: "Reset email successfully sended, please check your email",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
+  }
+};
+
+// @POST     | Public     | /api/auth/forgot-password/reset
+const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token) {
+    return res.status(401).json({
+      errors: [{ msg: "No token, Reset Password denied" }],
+    });
+  }
+
+  try {
+    const resetToken = await Token.findOne({ token });
+
+    // check if token exist or not
+    if (!resetToken) {
+      return res.status(401).json({
+        errors: [
+          {
+            msg:
+              "Token is not valid, Reset Password failed. Try requesting a new token",
+          },
+        ],
+      });
+    }
+
+    // check if token expired or not
+    if (Date.now() - Date.parse(resetToken.createdAt) > 18000000) {
+      // 30 minutes
+      return res.status(410).json({
+        errors: [
+          {
+            msg:
+              "Token has expired, Reset Password failed. Try requesting a new token",
+          },
+        ],
+      });
+    }
+
+    // reset password
+    const user = await User.findOne({ email: resetToken.email });
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.save();
+
+    // delete reset token
+    await resetToken.remove();
+
+    res.json({ msg: "Congratulations! Your password successfully reset" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
+  }
+};
 
 module.exports = {
   register,
   login,
   accountActivation,
   resendAccountActivationLink,
+  forgotPassword,
+  resetPassword,
 };

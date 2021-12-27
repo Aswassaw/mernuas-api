@@ -1,24 +1,23 @@
 const { htmlTemplateTop, htmlTemplateBottom } = require("./template");
 
-const activateAccount = (link) => {
+const resetPassword = (link) => {
   const htmlContent = `
   <p>
-    Anda menerima email ini karena Anda telah melakukan Registrasi Akun di Mernuas.
+    Anda menerima email ini karena Anda telah melakukan permintaan untuk Reset Password di Mernuas.
     <br>
-    Segera aktifkan akun Anda dengan click tombol di bawah ini.
+    Segera reset password Anda dengan click tombol di bawah ini.
   </p>
   
-  <a href="${link}" style="color: white;" class="auth-button">Aktifkan Akun</a>
+  <a href="${link}" style="color: white;" class="auth-button">Reset Password</a>
   
   <p>
-    Token tersebut akan kedaluwarsa dalam 30 menit.
+    Link tersebut akan kedaluwarsa dalam 30 menit.
     <br>
-    Jika Anda tidak merasa melakukan Registrasi Akun di Mernuas, abaikan email ini.
+    Jika Anda tidak merasa melakukan permintaan untuk Reset Password di Mernuas, abaikan email ini.
     <br>
     Link alternatif: <a href="${link}">${link}</a>
   </p>
   
-
   <hr>
   
   <p>Copyright &copy; ${new Date().getFullYear()} Mernuas - Developed with <span style="color: red !important;">❤️</span> by <a style="text-decoration: none;" href="https://github.com/andry-pebrianto" target="_blank">Andry Pebrianto</a> in Trenggalek</p>`;
@@ -26,4 +25,4 @@ const activateAccount = (link) => {
   return htmlTemplateTop + htmlContent + htmlTemplateBottom;
 };
 
-module.exports = activateAccount;
+module.exports = resetPassword;

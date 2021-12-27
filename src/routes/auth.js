@@ -5,9 +5,16 @@ const {
   login,
   accountActivation,
   resendAccountActivationLink,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/auth");
 const runValidation = require("../utils/runValidation");
-const { registerValidation, loginValidation } = require("../validations/auth");
+const {
+  registerValidation,
+  loginValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
+} = require("../validations/auth");
 
 const router = express.Router();
 
@@ -18,6 +25,24 @@ router.post("/login", loginValidation, runValidation, login);
 // @POST     | Public     | /api/auth/account-activation
 router.post("/account-activation", accountActivation);
 // @POST     | Private    | /api/auth/account-activation/resend
-router.post("/account-activation/resend", authorization, resendAccountActivationLink);
+router.post(
+  "/account-activation/resend",
+  authorization,
+  resendAccountActivationLink
+);
+// @POST     | Public     | /api/auth/forgot-password
+router.post(
+  "/forgot-password",
+  forgotPasswordValidation,
+  runValidation,
+  forgotPassword
+);
+// @POST     | Public     | /api/auth/forgot-password/reset
+router.post(
+  "/forgot-password/reset",
+  resetPasswordValidation,
+  runValidation,
+  resetPassword
+);
 
 module.exports = router;
