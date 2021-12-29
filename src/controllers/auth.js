@@ -145,7 +145,7 @@ const accountActivation = async (req, res) => {
         errors: [
           {
             msg:
-              "Token is not valid, Activation failed. Try requesting a new token",
+              "Link is not valid, Activation failed. Try requesting a new link",
           },
         ],
       });
@@ -158,7 +158,7 @@ const accountActivation = async (req, res) => {
         errors: [
           {
             msg:
-              "Token has expired, Activation failed. Try requesting a new token",
+              "Link has expired, Activation failed. Try requesting a new link",
           },
         ],
       });
@@ -240,7 +240,11 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // // create new token instance
+    const oldToken = await Token.findOne({ email, type: "Reset Password" });
+    // delete old reset password token
+    if (oldToken) await oldToken.remove();
+
+    // create new token instance
     const token = crypto.randomBytes(30).toString("hex");
     const newToken = new Token({
       token,
@@ -257,7 +261,7 @@ const forgotPassword = async (req, res) => {
       to: email,
       subject: "Reset Your Password!",
       html: resetPasswordEmail(
-        `${process.env.CLIENT_URL}/reset/${newToken.token}`
+        `${process.env.CLIENT_URL}/reset-password/${newToken.token}`
       ),
     };
     sendEmail(templateEmail);
@@ -290,7 +294,7 @@ const resetPassword = async (req, res) => {
         errors: [
           {
             msg:
-              "Token is not valid, Reset Password failed. Try requesting a new token",
+              "Link is not valid, Reset Password failed. Try requesting a new token",
           },
         ],
       });
@@ -303,7 +307,7 @@ const resetPassword = async (req, res) => {
         errors: [
           {
             msg:
-              "Token has expired, Reset Password failed. Try requesting a new token",
+              "Link has expired, Reset Password failed. Try requesting a new token",
           },
         ],
       });
