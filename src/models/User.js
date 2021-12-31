@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "user", // user -> admin -> superadmin
     },
+    loginWithGoogle: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );

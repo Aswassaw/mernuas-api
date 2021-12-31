@@ -2,6 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const Token = require("../models/Token");
 const activateAccountEmail = require("../utils/email/activateAccountEmail");
@@ -48,7 +49,7 @@ const register = async (req, res) => {
     await newUser.save();
     await newToken.save();
 
-    // send email for activate account account
+    // send email for activate account
     const templateEmail = {
       from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
       to: newUser.email,
@@ -120,6 +121,120 @@ const login = async (req, res) => {
         res.json({ token });
       }
     );
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
+  }
+};
+
+// @POST     | Public     | /api/auth/login-with-google
+const loginWithGoogle = async (req, res) => {
+  const client = new OAuth2Client(process.env.CLIENT_ID);
+  const { tokenId } = req.body;
+  console.log(tokenId);
+
+  try {
+    const response = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.CLIENT_ID,
+    });
+    const { email_verified, name, email } = response.payload;
+
+    if (email_verified) {
+      const user = await User.findOne({ email });
+
+      // jika user sudah terdaftar
+      if (user) {
+        // jika user terdaftar menggunakan login with google
+        if (user.loginWithGoogle) {
+          // send jsonwebtoken
+          jwt.sign(
+            {
+              user: {
+                id: user.id,
+              },
+            },
+            process.env.JWT_SECRET,
+            {
+              expiresIn: 18000, // will expired after 5 hours
+            },
+            (err, token) => {
+              if (err) throw err;
+
+              res.json({ token });
+            }
+          );
+        }
+
+        // jika user terdaftar menggunakan email dan password
+        else {
+          return res.status(400).json({
+            errors: [
+              {
+                msg:
+                  "That Email already registered using another way. Please login with Email and Password.",
+              },
+            ],
+          });
+        }
+      }
+
+      // jika user belum terdaftar
+      else {
+        const password = email + process.env.JWT_SECRET;
+        const newUser = new User({
+          name,
+          slug:
+            name.trim().toLowerCase().split(" ").join("-") +
+            "-" +
+            crypto.randomBytes(6).toString("hex"),
+          email,
+          password,
+          loginWithGoogle: true,
+        });
+
+        // create new token instance
+        const token = crypto.randomBytes(30).toString("hex");
+        const newToken = new Token({
+          token,
+          email: newUser.email,
+          type: "Activate Account",
+        });
+
+        // save new user and token to db
+        await newUser.save();
+        await newToken.save();
+
+        // send email for activate account
+        const templateEmail = {
+          from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
+          to: newUser.email,
+          subject: "Activate Your Account!",
+          html: activateAccountEmail(
+            `${process.env.CLIENT_URL}/activate/${newToken.token}`
+          ),
+        };
+        sendEmail(templateEmail);
+
+        // send jsonwebtoken
+        jwt.sign(
+          {
+            user: {
+              id: newUser.id,
+            },
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: 18000, // will expired after 5 hours
+          },
+          (err, token) => {
+            if (err) throw err;
+
+            res.status(201).json({ token });
+          }
+        );
+      }
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ errors: [{ msg: "Server Error" }] });
@@ -332,6 +447,7 @@ const resetPassword = async (req, res) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   accountActivation,
   resendAccountActivationLink,
   forgotPassword,

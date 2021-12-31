@@ -3,6 +3,7 @@ const authorization = require("../middlewares/authorization");
 const {
   register,
   login,
+  loginWithGoogle,
   accountActivation,
   resendAccountActivationLink,
   forgotPassword,
@@ -22,6 +23,8 @@ const router = express.Router();
 router.post("/register", registerValidation, runValidation, register);
 // @POST     | Public     | /api/auth/login
 router.post("/login", loginValidation, runValidation, login);
+// @POST     | Public     | /api/auth/login-with-google
+router.post("/login-with-google", loginWithGoogle);
 // @POST     | Public     | /api/auth/account-activation
 router.post("/account-activation", accountActivation);
 // @POST     | Private    | /api/auth/account-activation/resend
