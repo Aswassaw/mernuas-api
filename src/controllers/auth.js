@@ -1,4 +1,6 @@
 require("dotenv").config();
+const axios = require("axios");
+const superagent = require("superagent"); // axios dan superagent sama saja
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
@@ -129,14 +131,14 @@ const login = async (req, res) => {
 
 // @POST     | Public     | /api/auth/login-with-google
 const loginWithGoogle = async (req, res) => {
-  const client = new OAuth2Client(process.env.CLIENT_ID);
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const { tokenId } = req.body;
   console.log(tokenId);
 
   try {
     const response = await client.verifyIdToken({
       idToken: tokenId,
-      audience: process.env.CLIENT_ID,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
     const { email_verified, name, email } = response.payload;
 
@@ -145,8 +147,8 @@ const loginWithGoogle = async (req, res) => {
 
       // jika user sudah terdaftar
       if (user) {
-        // jika user terdaftar menggunakan login with google
-        if (user.loginWithGoogle) {
+        // jika user tidak terdaftar dengan email dan password
+        if (!user.loginWithEmailAndPassword) {
           // send jsonwebtoken
           jwt.sign(
             {
@@ -171,8 +173,7 @@ const loginWithGoogle = async (req, res) => {
           return res.status(400).json({
             errors: [
               {
-                msg:
-                  "That Email already registered using another way. Please login with Email and Password.",
+                msg: `That Email already registered using another way. Please use Login With ${user.loginMethod} instead.`,
               },
             ],
           });
@@ -190,7 +191,8 @@ const loginWithGoogle = async (req, res) => {
             crypto.randomBytes(6).toString("hex"),
           email,
           password,
-          loginWithGoogle: true,
+          loginWithEmailAndPassword: false,
+          loginMethod: "Google",
         });
 
         // create new token instance
@@ -234,6 +236,135 @@ const loginWithGoogle = async (req, res) => {
           }
         );
       }
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
+  }
+};
+
+// @POST     | Public     | /api/auth/login-with-github
+const loginWithGithub = async (req, res) => {
+  const { tokenId } = req.body;
+  console.log(tokenId);
+
+  try {
+    const response = await superagent
+      .post("https://github.com/login/oauth/access_token")
+      .send({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code: tokenId,
+      }) // sends a JSON post body
+      .set("Accept", "application/json");
+    const data = response.body;
+    console.log(data);
+
+    // get github data
+    const githubData = await axios.get("https://api.github.com/user", {
+      headers: {
+        Authorization: "token " + data.access_token,
+      },
+    });
+    // get github email
+    const githubEmail = await axios.get("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: "token " + data.access_token,
+      },
+    });
+
+    const user = await User.findOne({ email: githubEmail.data[0].email });
+
+    // jika user sudah terdaftar
+    if (user) {
+      // jika user tidak terdaftar dengan email dan password
+      if (user.loginWithEmailAndPassword) {
+        // send jsonwebtoken
+        jwt.sign(
+          {
+            user: {
+              id: user.id,
+            },
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: 18000, // will expired after 5 hours
+          },
+          (err, token) => {
+            if (err) throw err;
+
+            res.json({ token });
+          }
+        );
+      }
+
+      // jika user terdaftar menggunakan email dan password
+      else {
+        return res.status(400).json({
+          errors: [
+            {
+              msg: `That Email already registered using another way. Please use Login With ${user.loginMethod} instead.`,
+            },
+          ],
+        });
+      }
+    }
+
+    // jika user belum terdaftar
+    else {
+      const password = githubEmail.data[0].email + process.env.JWT_SECRET;
+      const newUser = new User({
+        name: githubData.data.name,
+        slug:
+          githubData.data.name.trim().toLowerCase().split(" ").join("-") +
+          "-" +
+          crypto.randomBytes(6).toString("hex"),
+        email: githubEmail.data[0].email,
+        password,
+        loginWithEmailAndPassword: false,
+        loginMethod: "Github",
+      });
+
+      // create new token instance
+      const token = crypto.randomBytes(30).toString("hex");
+      const newToken = new Token({
+        token,
+        email: newUser.email,
+        type: "Activate Account",
+      });
+
+      // save new user and token to db
+      await newUser.save();
+      await newToken.save();
+
+      // send email for activate account
+      const templateEmail = {
+        from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
+        to: newUser.email,
+        subject: "Activate Your Account!",
+        html: activateAccountEmail(
+          `${process.env.CLIENT_URL}/activate/${newToken.token}`
+        ),
+      };
+      sendEmail(templateEmail);
+
+      // send jsonwebtoken
+      jwt.sign(
+        {
+          user: {
+            id: newUser.id,
+          },
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: 18000, // will expired after 5 hours
+        },
+        (err, token) => {
+          if (err) throw err;
+
+          res.status(201).json({ token });
+        }
+      );
     }
   } catch (error) {
     console.log(error);
@@ -448,6 +579,7 @@ module.exports = {
   register,
   login,
   loginWithGoogle,
+  loginWithGithub,
   accountActivation,
   resendAccountActivationLink,
   forgotPassword,

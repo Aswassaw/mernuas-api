@@ -15,6 +15,7 @@
   "author": "Andry Pebrianto",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.2",
     "compression": "^1.7.4",
@@ -24,6 +25,7 @@
     "env-cmd": "^10.1.0",
     "express": "^4.17.1",
     "express-validator": "^6.13.0",
+    "flatted": "^3.2.4",
     "google-auth-library": "^7.10.0",
     "googleapis": "^92.0.0",
     "helmet": "^4.6.0",
@@ -31,6 +33,7 @@
     "mongoose": "^6.0.10",
     "morgan": "^1.10.0",
     "nodemailer": "^6.7.2",
-    "npm": "^8.3.0"
+    "npm": "^8.3.0",
+    "superagent": "^7.0.1"
   }
 }

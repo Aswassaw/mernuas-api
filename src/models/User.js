@@ -38,9 +38,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "user", // user -> admin -> superadmin
     },
-    loginWithGoogle: {
+    loginWithEmailAndPassword: {
       type: Boolean,
-      default: false,
+      default: true,
+    },
+    loginMethod: {
+      type: String,
+      default: "Email & Password"
     }
   },
   { timestamps: true }

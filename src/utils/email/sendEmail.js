@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 // oayh2 config
 const oAuth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
+  process.env.GOOGLE_CLIENT_SECRET,
   process.env.REDIRECT_URL
 );
 oAuth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
@@ -20,7 +20,7 @@ const sendEmail = async (dataEmail) => {
         type: "OAuth2",
         user: process.env.EMAIL_USER,
         clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: process.env.REFRESH_TOKEN,
         accessToken: accessToken,
       }
