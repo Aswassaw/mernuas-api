@@ -148,7 +148,7 @@ const loginWithGoogle = async (req, res) => {
       // jika user sudah terdaftar
       if (user) {
         // jika user tidak terdaftar dengan email dan password
-        if (!user.loginWithEmailAndPassword) {
+        if (!user.loginWithEmailAndPassword && user.loginMethod !== "Google") {
           // send jsonwebtoken
           jwt.sign(
             {
@@ -278,7 +278,7 @@ const loginWithGithub = async (req, res) => {
     // jika user sudah terdaftar
     if (user) {
       // jika user tidak terdaftar dengan email dan password
-      if (user.loginWithEmailAndPassword) {
+      if (!user.loginWithEmailAndPassword && user.loginMethod !== "Github") {
         // send jsonwebtoken
         jwt.sign(
           {
