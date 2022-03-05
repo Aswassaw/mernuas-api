@@ -45,6 +45,10 @@ const UserSchema = new mongoose.Schema(
     loginMethod: {
       type: String,
       default: "Email & Password"
+    },
+    socialId: {
+      type: String,
+      default: ""
     }
   },
   { timestamps: true }

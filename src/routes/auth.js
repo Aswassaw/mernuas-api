@@ -5,6 +5,7 @@ const {
   login,
   loginWithGoogle,
   loginWithGithub,
+  loginWithFacebook,
   accountActivation,
   resendAccountActivationLink,
   forgotPassword,
@@ -26,6 +27,8 @@ router.post("/register", registerValidation, runValidation, register);
 router.post("/login", loginValidation, runValidation, login);
 // @POST     | Public     | /api/auth/login-with-google
 router.post("/login-with-google", loginWithGoogle);
+// @POST     | Public     | /api/auth/login-with-facebook
+router.post("/login-with-facebook", loginWithFacebook);
 // @POST     | Public     | /api/auth/login-with-github
 router.post("/login-with-github", loginWithGithub);
 // @POST     | Public     | /api/auth/account-activation

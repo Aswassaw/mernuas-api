@@ -133,17 +133,16 @@ const login = async (req, res) => {
 const loginWithGoogle = async (req, res) => {
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const { tokenId } = req.body;
-  console.log(tokenId);
 
   try {
     const response = await client.verifyIdToken({
       idToken: tokenId,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const { email_verified, name, email } = response.payload;
+    const { email_verified, name, email, sub } = response.payload;
 
     if (email_verified) {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ socialId: sub });
 
       // jika user sudah terdaftar
       if (user) {
@@ -193,6 +192,7 @@ const loginWithGoogle = async (req, res) => {
           password,
           loginWithEmailAndPassword: false,
           loginMethod: "Google",
+          socialId: sub,
         });
 
         // create new token instance
@@ -246,7 +246,6 @@ const loginWithGoogle = async (req, res) => {
 // @POST     | Public     | /api/auth/login-with-github
 const loginWithGithub = async (req, res) => {
   const { tokenId } = req.body;
-  console.log(tokenId);
 
   try {
     const response = await superagent
@@ -258,7 +257,6 @@ const loginWithGithub = async (req, res) => {
       }) // sends a JSON post body
       .set("Accept", "application/json");
     const data = response.body;
-    console.log(data);
 
     // get github data
     const githubData = await axios.get("https://api.github.com/user", {
@@ -266,6 +264,7 @@ const loginWithGithub = async (req, res) => {
         Authorization: "token " + data.access_token,
       },
     });
+
     // get github email
     const githubEmail = await axios.get("https://api.github.com/user/emails", {
       headers: {
@@ -273,7 +272,7 @@ const loginWithGithub = async (req, res) => {
       },
     });
 
-    const user = await User.findOne({ email: githubEmail.data[0].email });
+    const user = await User.findOne({ socialId: githubData.data.id });
 
     // jika user sudah terdaftar
     if (user) {
@@ -323,6 +322,119 @@ const loginWithGithub = async (req, res) => {
         password,
         loginWithEmailAndPassword: false,
         loginMethod: "Github",
+        socialId: githubData.data.id,
+      });
+
+      // create new token instance
+      const token = crypto.randomBytes(30).toString("hex");
+      const newToken = new Token({
+        token,
+        email: newUser.email,
+        type: "Activate Account",
+      });
+
+      // save new user and token to db
+      await newUser.save();
+      await newToken.save();
+
+      // send email for activate account
+      const templateEmail = {
+        from: `"${process.env.APP_NAME}" <${process.env.EMAIL_FROM}>`,
+        to: newUser.email,
+        subject: "Activate Your Account!",
+        html: activateAccountEmail(
+          `${process.env.CLIENT_URL}/activate/${newToken.token}`
+        ),
+      };
+      sendEmail(templateEmail);
+
+      // send jsonwebtoken
+      jwt.sign(
+        {
+          user: {
+            id: newUser.id,
+          },
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: 18000, // will expired after 5 hours
+        },
+        (err, token) => {
+          if (err) throw err;
+
+          res.status(201).json({ token });
+        }
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ errors: [{ msg: "Server Error" }] });
+  }
+};
+
+// @POST     | Public     | /api/auth/login-with-facebook
+const loginWithFacebook = async (req, res) => {
+  const { accessToken, userID } = req.body;
+
+  try {
+    const response = await superagent
+      .get(
+        `https://graph.facebook.com/v2.11/${userID}/?fields=id,name,email,picture.width(720).height(720)&access_token=${accessToken}`
+      )
+      .set("Accept", "application/json");
+    const data = response.body;
+
+    const user = await User.findOne({ socialId: data.id });
+
+    // jika user sudah terdaftar
+    if (user) {
+      // jika user tidak terdaftar dengan email dan password
+      if (!user.loginWithEmailAndPassword && user.loginMethod === "Facebook") {
+        // send jsonwebtoken
+        jwt.sign(
+          {
+            user: {
+              id: user.id,
+            },
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: 18000, // will expired after 5 hours
+          },
+          (err, token) => {
+            if (err) throw err;
+
+            res.json({ token });
+          }
+        );
+      }
+
+      // jika user terdaftar menggunakan email dan password
+      else {
+        return res.status(400).json({
+          errors: [
+            {
+              msg: `That Email already registered using another way. Please use Login With ${user.loginMethod} instead.`,
+            },
+          ],
+        });
+      }
+    }
+
+    // jika user belum terdaftar
+    else {
+      const password = data.email + process.env.JWT_SECRET;
+      const newUser = new User({
+        name: data.name,
+        slug:
+          data.name.trim().toLowerCase().split(" ").join("-") +
+          "-" +
+          crypto.randomBytes(6).toString("hex"),
+        email: data.email,
+        password,
+        loginWithEmailAndPassword: false,
+        loginMethod: "Facebook",
+        socialId: data.id,
       });
 
       // create new token instance
@@ -580,6 +692,7 @@ module.exports = {
   login,
   loginWithGoogle,
   loginWithGithub,
+  loginWithFacebook,
   accountActivation,
   resendAccountActivationLink,
   forgotPassword,

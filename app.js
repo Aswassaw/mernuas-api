@@ -25,13 +25,13 @@ if (process.env.NODE_ENV === "production") {
   app.use(morgan("combined"));
   app.use(
     cors({
-      origin: ["https://mernuas.netlify.app", "http://localhost:3000"],
+      origin: ["https://mernuas.netlify.app", "http://localhost:3000", "https://localhost:3000"],
       optionsSuccessStatus: 200, // For legacy browser support
     })
   );
 } else {
   app.use(morgan("dev"));
-  app.use(cors({ origin: "http://localhost:3000" }));
+  app.use(cors({ origin: ["http://localhost:3000", "https://localhost:3000"] }));
 }
 
 // Root Endpoint
