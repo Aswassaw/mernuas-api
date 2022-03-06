@@ -142,7 +142,7 @@ const loginWithGoogle = async (req, res) => {
     const { email_verified, name, email, sub } = response.payload;
 
     if (email_verified) {
-      const user = await User.findOne({ socialId: sub });
+      const user = await User.findOne({ $or: [{ socialId: sub }, { email }] });
 
       // jika user sudah terdaftar
       if (user) {
@@ -272,7 +272,12 @@ const loginWithGithub = async (req, res) => {
       },
     });
 
-    const user = await User.findOne({ socialId: githubData.data.id });
+    const user = await User.findOne({
+      $or: [
+        { socialId: githubData.data.id },
+        { email: githubEmail.data[0].email },
+      ],
+    });
 
     // jika user sudah terdaftar
     if (user) {
@@ -384,7 +389,9 @@ const loginWithFacebook = async (req, res) => {
       .set("Accept", "application/json");
     const data = response.body;
 
-    const user = await User.findOne({ socialId: data.id });
+    const user = await User.findOne({
+      $or: [{ socialId: data.id }, { email: data.email }],
+    });
 
     // jika user sudah terdaftar
     if (user) {
