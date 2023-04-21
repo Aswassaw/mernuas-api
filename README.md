@@ -11,4 +11,4 @@ Api untuk Mernuas, sebuah aplikasi berbasis MERN Stack dengan studi kasus sebuah
 - Morgan
 
 ## Demo
-https://mernuas.herokuapp.com/
+https://mernuas-api.onrender.com
